@@ -1,0 +1,78 @@
+name: Development Task
+description: Plan and track an API validation or automation workflow change.
+title: "[Task] "
+labels:
+  - development
+  - api-testing
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Describe the issue, gap, or behavior change needed.
+      placeholder: Explain what needs to change and why.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: Describe the expected API, UI, test, or CI behavior.
+      placeholder: Explain the target behavior clearly.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: List what should be changed.
+      placeholder: Backend API, frontend login page, pytest tests, GitHub Actions, documentation, or other affected areas.
+    validations:
+      required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of Scope
+      description: List anything that should not be changed in this task.
+      placeholder: Keep unrelated behavior, tooling, or refactors out of this task.
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Define how this task will be verified.
+      placeholder: List measurable conditions that must be true before closing the ticket.
+    validations:
+      required: true
+
+  - type: textarea
+    id: test_cases
+    attributes:
+      label: Test Cases
+      description: List pytest test cases to add or update.
+      placeholder: Include success, failure, boundary, authentication, and regression scenarios when relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation_notes
+    attributes:
+      label: Implementation Notes
+      description: Capture technical notes, affected files, and assumptions.
+      placeholder: Mention endpoints, response codes, config, or CI impact.
+    validations:
+      required: false
+
+  - type: textarea
+    id: completion_report
+    attributes:
+      label: Completion Report
+      description: Fill this before closing the ticket.
+      placeholder: Summarize root cause or reason for change, solution, test result, report location, and security check result.
+    validations:
+      required: false
