@@ -38,7 +38,7 @@ The project includes a small login page, authentication APIs, token-protected ac
 Create a local `.env` file:
 
 ```text
-JWT_SIGNING_KEY=local-development-signing-key
+JWT_SIGNING_KEY=replace-with-your-local-signing-key
 ```
 
 The repository includes `.env.example` for required configuration keys.
@@ -118,6 +118,12 @@ Run the API test suite:
 .\.venv\Scripts\python -m pytest
 ```
 
+Generate local test reports:
+
+```powershell
+.\.venv\Scripts\python -m pytest --html=reports/report.html --self-contained-html
+```
+
 Current coverage includes:
 
 - health check
@@ -145,10 +151,10 @@ Workflow file:
 .github/workflows/api-tests.yml
 ```
 
-The workflow also publishes a JUnit XML test report as a downloadable artifact:
+The workflow also publishes an HTML test report as a downloadable artifact:
 
 ```text
-pytest-junit-report
+pytest-html-report
 ```
 
 ## Repository Safety
