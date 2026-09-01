@@ -145,6 +145,12 @@ Workflow file:
 .github/workflows/api-tests.yml
 ```
 
+The workflow also publishes a JUnit XML test report as a downloadable artifact:
+
+```text
+pytest-junit-report
+```
+
 ## Repository Safety
 
 Ignored local files include:

@@ -3,6 +3,7 @@ __pycache__/
 .pytest_cache/
 docs/
 *.pyc
+test-results.xml
 .env
 *.key
 *.pem
