@@ -37,6 +37,20 @@ For each requirement:
 9. Run security checks.
 10. Prepare the ticket completion report.
 
+## Ticket Source of Truth
+
+GitHub Issues are the source of truth for ticket-level artifacts.
+
+Store the following in the GitHub Issue body or comments:
+
+- Ticket Analyst plan
+- Coordinator review decisions
+- QA review notes
+- Completion report
+- Closure decision
+
+Do not commit per-ticket markdown files into this repository. The repository should keep reusable workflow rules, role prompts, issue templates, source code, tests, and CI configuration.
+
 ## Agent Handoff Artifacts
 
 Each agent should produce a concise handoff artifact.
@@ -50,6 +64,8 @@ Ticket Analyst output:
 - Acceptance criteria
 - Test cases
 - Clarification questions if needed
+
+The Harness Coordinator reviews this output and writes the final ticket plan into GitHub Issues.
 
 QA Reviewer output:
 

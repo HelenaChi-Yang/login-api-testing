@@ -74,23 +74,25 @@ The default workflow uses one agent with separated responsibility stages:
 
 This mode should be used while the repository is small, the requirement is narrow, and one agent can keep the full context without losing accuracy.
 
-## Future Harness Mode
+## Pilot Harness Mode
 
-When the workflow becomes too large for one agent to manage reliably, switch to a harness-style orchestration model.
+The current workflow uses a pilot harness-style orchestration model for selected requirements.
 
-Harness mode means a coordinator controls the delivery flow and delegates work to specialized agents.
+Harness mode means a coordinator controls the delivery flow, records decisions as artifacts, and delegates bounded work to specialized agents.
 
 Reusable harness workflow notes and role prompts are stored under `ai-workflow/`.
 
-Suggested roles:
+GitHub Issues are the source of truth for ticket plans, coordinator review decisions, QA review notes, completion reports, and closure decisions. Do not commit per-ticket markdown files into the repository.
+
+Current roles:
 
 - Harness Coordinator: controls the sequence, validates handoffs, and decides whether a ticket is ready to close.
 - Ticket Analyst Agent: reads the ticket and produces scope, acceptance criteria, and test expectations.
-- Developer Agent: implements the change according to the approved plan.
-- QA Agent: reviews test coverage, runs tests, investigates failures, and verifies the test report.
+- Developer: implemented by the Harness Coordinator while the repository remains small and code edits are tightly coupled.
+- QA Reviewer Agent: reviews test coverage, runs tests, investigates failures, and verifies the test report.
 - Release Reporter Agent: prepares root cause or reason for change, solution summary, test evidence, and closure notes.
 
-Use harness mode when one or more of the following is true:
+Use pilot harness mode when one or more of the following is true:
 
 - The ticket affects multiple areas such as API behavior, frontend behavior, CI, and documentation.
 - The implementation requires parallel investigation.
@@ -99,15 +101,16 @@ Use harness mode when one or more of the following is true:
 - The agent starts losing track of prior decisions, scope boundaries, or test expectations.
 - The user explicitly asks to experience or demonstrate a multi-agent workflow.
 
-Do not switch to harness mode automatically unless the user approves it.
+Do not delegate code edits to a Developer Agent unless the user approves it and the write scope is clearly isolated.
 
-Before switching, the agent should explain:
+Before delegating work, the Harness Coordinator should explain:
 
-- Why single-agent mode is no longer enough.
 - Which specialized agents are needed.
 - What each agent will own.
 - What artifacts will be passed between agents.
 - How the final result will be verified.
+
+Coordinator review decisions must be written into the GitHub Issue or completion report. They should not exist only in conversation memory.
 
 ## Testing Standard
 
