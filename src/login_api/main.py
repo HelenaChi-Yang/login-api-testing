@@ -18,6 +18,8 @@ VALID_PASSWORD = "password123"
 TOKEN_SIGNING_KEY = os.getenv("JWT_SIGNING_KEY")
 TOKEN_ALGORITHM = "HS256"
 TOKEN_EXPIRE_MINUTES = 30
+LOCKOUT_FAILED_ATTEMPT_LIMIT = 3
+FAILED_LOGIN_ATTEMPTS: dict[str, int] = {}
 
 if TOKEN_SIGNING_KEY is None:
     raise RuntimeError("JWT_SIGNING_KEY environment variable is required")
@@ -45,6 +47,18 @@ def create_access_token(account: str) -> str:
     payload = {"sub": account, "exp": expires_at}
 
     return jwt.encode(payload, TOKEN_SIGNING_KEY, algorithm=TOKEN_ALGORITHM)
+
+
+def is_account_locked(account: str) -> bool:
+    return FAILED_LOGIN_ATTEMPTS.get(account, 0) >= LOCKOUT_FAILED_ATTEMPT_LIMIT
+
+
+def record_failed_login(account: str) -> None:
+    FAILED_LOGIN_ATTEMPTS[account] = FAILED_LOGIN_ATTEMPTS.get(account, 0) + 1
+
+
+def reset_failed_logins(account: str) -> None:
+    FAILED_LOGIN_ATTEMPTS.pop(account, None)
 
 
 def get_account_from_token(authorization: str | None) -> str:
@@ -91,11 +105,26 @@ def health() -> dict[str, str]:
 
 @app.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest) -> LoginResponse:
+    if request.account == VALID_ACCOUNT and is_account_locked(request.account):
+        raise HTTPException(
+            status_code=status.HTTP_423_LOCKED,
+            detail="Account locked",
+        )
+
+    if request.account == VALID_ACCOUNT and request.password != VALID_PASSWORD:
+        record_failed_login(request.account)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid account or password",
+        )
+
     if request.account != VALID_ACCOUNT or request.password != VALID_PASSWORD:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid account or password",
         )
+
+    reset_failed_logins(request.account)
 
     return LoginResponse(
         message="Login successful",

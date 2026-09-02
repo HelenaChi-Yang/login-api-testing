@@ -4,9 +4,12 @@ from datetime import UTC, datetime, timedelta
 os.environ["JWT_SIGNING_KEY"] = "test-signing-key"
 
 import jwt
+import pytest
 from fastapi.testclient import TestClient
 
 from src.login_api.main import (
+    FAILED_LOGIN_ATTEMPTS,
+    LOCKOUT_FAILED_ATTEMPT_LIMIT,
     TOKEN_ALGORITHM,
     TOKEN_SIGNING_KEY,
     VALID_ACCOUNT,
@@ -15,6 +18,13 @@ from src.login_api.main import (
 )
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def reset_login_attempts() -> None:
+    FAILED_LOGIN_ATTEMPTS.clear()
+    yield
+    FAILED_LOGIN_ATTEMPTS.clear()
 
 
 def login_successfully() -> str:
@@ -64,6 +74,68 @@ def test_login_with_invalid_credentials_returns_401() -> None:
 
     assert response.status_code == 401
     assert response.json() == {"detail": "Invalid account or password"}
+
+
+def test_login_locks_account_after_three_failed_password_attempts() -> None:
+    for _ in range(LOCKOUT_FAILED_ATTEMPT_LIMIT):
+        response = client.post(
+            "/login",
+            json={"account": VALID_ACCOUNT, "password": "wrong-password"},
+        )
+
+        assert response.status_code == 401
+        assert response.json() == {"detail": "Invalid account or password"}
+
+    response = client.post(
+        "/login",
+        json={"account": VALID_ACCOUNT, "password": VALID_PASSWORD},
+    )
+
+    assert response.status_code == 423
+    assert response.json() == {"detail": "Account locked"}
+
+
+def test_successful_login_before_lockout_resets_failed_attempts() -> None:
+    for _ in range(LOCKOUT_FAILED_ATTEMPT_LIMIT - 1):
+        response = client.post(
+            "/login",
+            json={"account": VALID_ACCOUNT, "password": "wrong-password"},
+        )
+
+        assert response.status_code == 401
+
+    login_response = client.post(
+        "/login",
+        json={"account": VALID_ACCOUNT, "password": VALID_PASSWORD},
+    )
+
+    assert login_response.status_code == 200
+
+    response = client.post(
+        "/login",
+        json={"account": VALID_ACCOUNT, "password": "wrong-password"},
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Invalid account or password"}
+
+
+def test_invalid_account_attempts_do_not_lock_valid_account() -> None:
+    for _ in range(LOCKOUT_FAILED_ATTEMPT_LIMIT):
+        response = client.post(
+            "/login",
+            json={"account": "unknown", "password": "wrong-password"},
+        )
+
+        assert response.status_code == 401
+
+    response = client.post(
+        "/login",
+        json={"account": VALID_ACCOUNT, "password": VALID_PASSWORD},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Login successful"
 
 
 def test_login_with_missing_password_returns_422() -> None:
